@@ -17,11 +17,12 @@ class Dataset():
         self.y_test   = None
         self.A_test   = None
         self.Ah_test  = None
+        self.char_features = None
         self.seed = random_seed
 
     def create_syn(self, **kwargs):
         self.X_train, self.y_train, self.A_train,\
-            self.X_test, self.y_test, self.A_test = gen_syn_data(random_seed=self.seed, **kwargs)
+            self.X_test, self.y_test, self.A_test, self.char_features = gen_syn_data(random_seed=self.seed, **kwargs)
 
     def load(self, **kwargs):
         self.X_train = load_features(self.input_dir, 'train', **kwargs)

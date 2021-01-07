@@ -200,16 +200,26 @@ def gen_syn_data(
         adj_test  = sbm(n=n, p=p)
         graph_train = ig.Graph.Adjacency(adj_train.tolist())
         graph_test  = ig.Graph.Adjacency(adj_test.tolist())
+    elif model=='linear':
+        g = ig.Graph()
+        edges = [(i, i+1) for i in range(n_features-1)]
+        g.add_vertices(n_features)
+        g.add_edges(edges)
+        graph_train = graph_test = g
+        adj_train = np.array(g.get_adjacency().data)
+        adj_test  = np.array(g.get_adjacency().data)
     else:
-        print("Unrecognized random graph generation model. Please use ER, BA or SBM.")
+        print("Unrecognized random graph generation model. Please use ER, BA, linear, or SBM.")
     X_train = []
     y_train = []
     X_test  = []
     y_test  = []
+    char_feat = dict()
     if syn_method=="sign":
         for c in range(n_classes):
             # Draw the features which define this class
             char_features = np.random.choice(n_features,size=n_char_features,replace=False)
+            char_feat[c] = char_features
             for i in range(n_obs_train):
                 # Start from a random vector
                 features = np.random.normal(0, 1, n_features)
@@ -245,8 +255,11 @@ def gen_syn_data(
                 y_test.append(c)
     elif syn_method=="diffusion":
         for c in range(n_classes):
+            signal[0] = np.random.normal(signal[0], 1, 1)
+            signal[1] = np.random.normal(signal[1], 1, 1)
             # Draw the features which define this class
             char_features = np.random.choice(n_features,size=n_char_features,replace=False)
+            char_feat[c] = char_features
             for i in range(n_obs_train):
                 # Start from a random vector
                 features = np.abs(np.random.normal(0, 1, n_features))
@@ -287,6 +300,7 @@ def gen_syn_data(
         for c in range(n_classes):
             # Draw the features which define this class
             char_features = np.random.choice(n_features,size=n_char_features,replace=False)
+            char_feat[c] = char_features
             for i in range(n_obs_train):
                 # Start from a random vector
                 features = np.random.normal(0, 1, n_features)
@@ -333,8 +347,8 @@ def gen_syn_data(
     X_test    = np.array(X_test)[test_idx, :]
     y_test    = np.array(y_test)[test_idx]
 
-    return X_train, y_train, adj_train, \
-        X_test, y_test, adj_test
+    return np.absolute(X_train), y_train, adj_train, \
+        np.absolute(X_test), y_test, adj_test, char_feat
 
 
 def glasso(data, alphas=5, n_jobs=None):

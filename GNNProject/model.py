@@ -25,7 +25,7 @@ class NN(nn.Module):
         self.dropout_FC   = dropout_FC
         self.n_hidden_GNN = n_hidden_GNN
         self.n_hidden_FC  = n_hidden_FC
-
+        self.conv         = False
         if self.n_layers_GNN > 0:
             self.FC = False
 
@@ -51,9 +51,17 @@ class NN(nn.Module):
         if self.FC:
             # Resize from (1,batch_size * n_features) to (batch_size, n_features)
             x = x.view(-1,self.n_features)
-        for layer in self.layers_GNN:
-            x = F.relu(layer(x, edge_index))
-            x = F.dropout(x, p=self.dropout_GNN, training=self.training)
+        if self.conv:
+            x = x.view(-1,1,self.n_features)
+            for layer in self.layers_GNN:
+                x = F.relu(layer(x))
+                x = F.max_pool1d(x, kernel_size=self.pool_K, stride=1, padding=self.pool_K//2, dilation=1)
+                x = F.dropout(x, p=self.dropout_GNN, training=self.training)
+            # x = F.max_pool1d(x)
+        else:
+            for layer in self.layers_GNN:
+                x = F.relu(layer(x, edge_index))
+                x = F.dropout(x, p=self.dropout_GNN, training=self.training)
         if self.n_layers_GNN > 0:
             x = x.view(-1, self.n_features*self.n_hidden_GNN[-1])
         for layer in self.layers_FC:
@@ -221,3 +229,25 @@ class TransformerConv(NN):
         if self.n_layers_GNN > 1:
             for i in range(self.n_layers_GNN-1):
                 self.layers_GNN.append(pyg_nn.TransformerConv(n_hidden_GNN[i], n_hidden_GNN[(i+1)]))
+
+class ConvNet(NN):
+    def __init__(self,
+        n_features,
+        n_classes,
+        n_hidden_GNN=[10],
+        n_hidden_FC=[],
+        filter_K=4,
+        pool_K=0,
+        dropout_GNN=0,
+        dropout_FC=0):
+        super(ConvNet, self).__init__(\
+            n_features, n_classes, n_hidden_GNN,\
+            n_hidden_FC, dropout_FC, dropout_GNN)
+        self.conv = True
+        self.filter_K = filter_K
+        self.pool_K   = pool_K
+
+        self.layers_GNN.append(nn.Conv1d(in_channels=1, out_channels=n_hidden_GNN[0], kernel_size=filter_K, padding=filter_K//2, dilation=1, stride=1))
+        if self.n_layers_GNN > 1:
+            for i in range(self.n_layers_GNN-1):
+                self.layers_GNN.append(nn.Conv1d(in_channels=n_hidden_GNN[i], out_channels=n_hidden_GNN[(i+1)], kernel_size=filter_K, padding=filter_K//2, dilation=1, stride=1))

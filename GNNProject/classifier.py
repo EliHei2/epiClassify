@@ -60,6 +60,7 @@ class Classifier():
         n_hidden_GNN=[],
         n_hidden_FC=[],
         K=4,
+        pool_K=4,
         dropout_GNN=0,
         dropout_FC=0, 
         classifier='MLP', 
@@ -101,7 +102,11 @@ class Classifier():
         if classifier =="TransformerConv":
             self.net = TransformerConv(n_features=n_features, n_classes=n_classes,\
                 n_hidden_GNN=n_hidden_GNN, n_hidden_FC=n_hidden_FC, \
-                dropout_FC=dropout_FC, dropout_GNN=dropout_GNN) 
+                dropout_FC=dropout_FC, dropout_GNN=dropout_GNN)
+        if classifier =="Conv1d":
+            self.net = ConvNet(n_features=n_features, n_classes=n_classes,\
+                n_hidden_GNN=n_hidden_GNN, n_hidden_FC=n_hidden_FC, \
+                dropout_FC=dropout_FC, dropout_GNN=dropout_GNN, filter_K=K, pool_K=pool_K)  
         self.criterion = nn.CrossEntropyLoss()
         self.optimizer = optim.SGD(self.net.parameters(), lr=lr, momentum=momentum)
         self.logging   = log_dir is not None
