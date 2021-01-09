@@ -1,6 +1,5 @@
 analysis/
-data_input/
-data_raw/
+data/
 output/
 __pycache__/
 docs/_build

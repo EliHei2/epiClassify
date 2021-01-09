@@ -44,6 +44,16 @@ def load_adj(path):
     adj = np.asarray(adj)
     return adj, num_nodes
 
+def load_names(path):
+    full_path = os.path.join(path, 'gene_names.txt')
+    if not os.path.isfile(full_path)
+        return None
+    features = []
+    with open(full_path, mode='r') as txt_file:
+        for row in txt_file:
+            features.append(row)
+    return features
+
 def load_classes(path, type, max_labels=None, **kwargs):
     """
         loads the classes.
@@ -67,7 +77,7 @@ def load_classes(path, type, max_labels=None, **kwargs):
     classes = pd.read_csv(full_path)
     nans = pd.isna(classes['class_']).values
     classes.dropna(axis=0, inplace=True)
-    classes['id'] = pd.factorize(classes.class_)[0]
+    classes['id'], classes_ = pd.factorize(classes.class_)
     labels = classes['id'].values
     labels -= (np.min(labels) - 1)
     # labels = classes['id'].values.astype(int)
@@ -87,7 +97,7 @@ def load_classes(path, type, max_labels=None, **kwargs):
         labels -= np.ones(shape=(num_graphs,), dtype=int)
         one_hot_labels = np.zeros((num_graphs, num_classes))
         one_hot_labels[np.arange(num_graphs), for_one_hot] = 1
-        return labels, one_hot_labels, num_graphs, max_labels + 1, nans
+        return labels, one_hot_labels, num_graphs, max_labels + 1, nans, classes_
 
 def load_features(path, type, is_binary=False, **kwargs):
     """

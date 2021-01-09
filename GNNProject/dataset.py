@@ -17,6 +17,8 @@ class Dataset():
         self.y_test   = None
         self.A_test   = None
         self.Ah_test  = None
+        self.classes  = None
+        self.features = None
         self.char_features = None
         self.seed = random_seed
 
@@ -29,6 +31,8 @@ class Dataset():
         self.y_train = load_classes(self.input_dir, 'train', **kwargs)[0]
         self.X_test  = load_features(self.input_dir, 'test', **kwargs)
         self.y_test  = load_classes(self.input_dir, 'test', **kwargs)[0]
+        self.classes = load_classes(self.input_dir, 'train', **kwargs)[5]
+        self.features = load_names(self.input_dir)
 
     def subsample(self, n_obs_train=None, n_obs_test=None):
         if n_obs_train is not None:
