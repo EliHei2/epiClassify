@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from graspologic.simulations import sbm
 from sklearn.metrics import *
-from sklearn.covariance import GraphicalLassoCV, graphical_lasso
+from sklearn.covariance import GraphicalLassoCV, graphical_lasso, LedoitWolf
 from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
 import igraph as ig 
@@ -14,6 +14,11 @@ import umap
 import torch
 import torch_geometric.data as geo_dt
 from sklearn.utils.extmath import fast_logdet
+import scanpy
+import pandas as pd
+import igraph as ig
+import numpy as np
+
 
 
 def load_adj(path):
@@ -45,13 +50,13 @@ def load_adj(path):
     return adj, num_nodes
 
 def load_names(path):
-    full_path = os.path.join(path, 'gene_names.txt')
-    if not os.path.isfile(full_path)
+    full_path = os.path.join(path, 'feature_names.txt')
+    if not os.path.isfile(full_path):
         return None
     features = []
     with open(full_path, mode='r') as txt_file:
         for row in txt_file:
-            features.append(row)
+            features.append(row.strip('\n'))
     return features
 
 def load_classes(path, type, max_labels=None, **kwargs):
@@ -81,14 +86,13 @@ def load_classes(path, type, max_labels=None, **kwargs):
     labels = classes['id'].values
     labels -= (np.min(labels) - 1)
     # labels = classes['id'].values.astype(int)
-    print(labels)
     if (max_labels is None) or max_labels >= np.max(labels):
         num_classes = np.max(labels)
         num_graphs = labels.shape[0]
         labels -= np.ones(shape=(num_graphs,), dtype=int)
         one_hot_labels = np.zeros((num_graphs, num_classes))
         one_hot_labels[np.arange(num_graphs), labels] = 1
-        return labels, one_hot_labels, num_graphs, num_classes, nans
+        return labels, one_hot_labels, num_graphs, num_classes, nans, classes_
     else:
         num_classes = max_labels
         num_graphs = labels.shape[0]
@@ -361,7 +365,7 @@ def gen_syn_data(
         np.absolute(X_test), y_test, adj_test, char_feat
 
 
-def glasso(data, alphas=5, n_jobs=None):
+def glasso(data, alphas=5, n_jobs=None, mode='cd'):
     """
         Estimates the graph with graphical lasso finding the best alpha based on cross validation
 
@@ -383,7 +387,7 @@ def glasso(data, alphas=5, n_jobs=None):
     adjacency_matrix[np.diag_indices_from(adjacency_matrix)] = 0
     return adjacency_matrix
 
-def glasso_R(data, alphas):
+def glasso_R(data, alphas, mode='cd'):
     """
         Estimates the graph with graphical lasso based on its implementation in R.
 
@@ -401,7 +405,7 @@ def glasso_R(data, alphas):
     data = scaler.fit_transform(data)
     _ , n_samples = data.shape
     cov_emp = np.dot(data.T, data) / n_samples
-    covariance, precision_matrix = graphical_lasso(emp_cov=cov_emp, alpha=alphas, mode='cd')
+    covariance, precision_matrix = graphical_lasso(emp_cov=cov_emp, alpha=alphas, mode=mode)
     adjacency_matrix = precision_matrix.astype(bool).astype(int)
     adjacency_matrix[np.diag_indices_from(adjacency_matrix)] = 0
     return adjacency_matrix
@@ -779,3 +783,11 @@ def sample_vec(vec, n):
         index = np.random.choice(ii, n)
         to_ret = np.append(to_ret, index)
     return to_ret
+
+def save_np_txt(ndarray, path, colnames=None, rownames=None):
+    df = pd.DataFrame(data=ndarray, index=rownames, columns=colnames)
+    df.to_csv(path, sep='\t', index=True, header=True)
+
+
+
+

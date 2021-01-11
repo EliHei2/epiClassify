@@ -3,10 +3,11 @@ from torch.optim import lr_scheduler
 import torch.nn as nn
 from torch.utils.data import TensorDataset, DataLoader, random_split
 from torch.utils.tensorboard import SummaryWriter
-
 from GNNProject.utils import compute_metrics
 from GNNProject.model import *
-
+from captum import *
+from captum.attr import IntegratedGradients
+import numpy as np
 
 class Classifier():
     """
@@ -111,6 +112,7 @@ class Classifier():
         self.optimizer = optim.SGD(self.net.parameters(), lr=lr, momentum=momentum)
         self.logging   = log_dir is not None
         self.device    = device
+        self.lr        = lr
         if self.logging:
             self.writer = SummaryWriter(log_dir=log_dir,flush_secs=1)
  
@@ -132,7 +134,9 @@ class Classifier():
         if self.logging:
             data= next(iter(data_loader))
             self.writer.add_graph(self.net,[data.x,data.edge_index])
-        self.scheduler = lr_scheduler.CosineAnnealingWarmRestarts(self.optimizer, T_0=10, T_mult=1, eta_min=0.0005, last_epoch=-1)
+        # self.scheduler = lr_scheduler.CyclicLR(self.optimizer, base_lr=self.lr, max_lr=0.01,step_size_up=5,mode="triangular2")
+
+        self.scheduler = lr_scheduler.CosineAnnealingWarmRestarts(self.optimizer, T_0=50, T_mult=1, eta_min=0.00005, last_epoch=-1)
         for epoch in range(epochs):
             self.net.train()
             self.net.to(self.device)
@@ -203,3 +207,20 @@ class Classifier():
             print('Recall: {:.3f}'.format(recall))
             print('f1_score: {:.3f}'.format(f1_score))
         return accuracy, conf_mat, precision, recall, f1_score
+
+    def interpret(self, data_loader, n_features, n_classes, save_path=None):
+        batch = next(iter(data_loader))
+        e = batch.edge_index.to(self.device).long()
+        def model_forward(input):
+            out = self.net(input, e)
+            return out
+        self.net.eval()
+        importances = np.zeros((n_features, n_classes))
+        for batch in data_loader:
+            input = batch.x.to(self.device)
+            target = batch.y.to(self.device)
+            ig = IntegratedGradients(model_forward)
+            attributions = ig.attribute(input, target=target)
+            attributions = attributions.to('cpu').detach().numpy()
+            importances[:, target.to('cpu').numpy()] += attributions
+        return importances

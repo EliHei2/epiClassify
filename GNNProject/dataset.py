@@ -44,17 +44,17 @@ class Dataset():
             self.y_test = self.y_test[test_indices]
             self.X_test = self.X_test[test_indices, :]
 
-    def create_graph(self, method='glasso_R', alphas=5, n_jobs=None):
+    def create_graph(self, method='glasso_R', alphas=5, n_jobs=None, mode='cd'):
         """
         Infer the graph (typically using graphical lasso) based on the data.
         """
         #TODO: add **kwargs
         if method == 'glasso':
-            self.Ah_train = glasso(self.X_train, alphas, n_jobs)
-            self.Ah_test  = glasso(self.X_test, alphas, n_jobs)
+            self.Ah_train = glasso(self.X_train, alphas, n_jobs, mode)
+            self.Ah_test  = glasso(self.X_test, alphas, n_jobs, mode)
         elif method=="glasso_R":
-            self.Ah_train = glasso_R(self.X_train, alphas)
-            self.Ah_test  = glasso_R(self.X_test, alphas)
+            self.Ah_train = glasso_R(self.X_train, alphas, mode)
+            self.Ah_test  = glasso_R(self.X_test, alphas, mode)
         elif method == "lw":
             self.Ah_train = lw(self.X_train, alphas)
             self.Ah_test  = lw(self.X_test, alphas)

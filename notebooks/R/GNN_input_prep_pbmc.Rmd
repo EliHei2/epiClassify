@@ -27,8 +27,10 @@ knitr::opts_chunk$set(autodep=TRUE, cache=FALSE, dev='png', cache.lazy = FALSE)
 
 ## Initialization and imports
 ```{r init_import}
+set.seed(1996)
 # imports
 suppressMessages(source('R/dep.R'))
+library('biomaRt')
 # initialization
 data_raw   = 'data/data_raw/pbmc'
 data_tidy  = 'data/data_tidy/pbmc'
@@ -39,11 +41,12 @@ dir.create(data_input)
 dir.create(data_tidy)
 dir.create(out_dir)
 ## parameters
-min_cells  = 500
+min_cells  = 400
 min_genes  = 1000
 min_counts = 100
-rho_pbmc1  = 0.1
-rho_pbmc2  = 0.1
+rho_pbmc1  = 0.5
+rho_pbmc2  = 0.3
+n_hvgs     = 500
 # dirs
 ## read
 counts_mtx_f = file.path(data_raw, 'counts.read.txt')
@@ -62,7 +65,7 @@ train_X_f    = file.path(data_input, 'data_train.txt')
 train_y_f    = file.path(data_input, 'classes_train.txt')
 test_X_f     = file.path(data_input, 'data_test.txt')
 test_y_f     = file.path(data_input, 'classes_test.txt')
-gene_names_f = file.path(data_input, 'gene_names.txt')
+feature_names_f = file.path(data_input, 'feature_names.txt')
 ### output
 graph_pbmc1_f = file.path(out_dir, sprintf('graph_pbmc1_%s.pdf', time_stamp))
 graph_pbmc2_f = file.path(out_dir, sprintf('graph_pbmc2_%s.pdf', time_stamp))
@@ -70,12 +73,12 @@ graph_pbmc2_f = file.path(out_dir, sprintf('graph_pbmc2_%s.pdf', time_stamp))
 
 ## Load input data
 ```{r load_input, message=FALSE, warning=FALSE, paged.print=FALSE}
-cell_types = c('B cell', 'CD14+ monocyte', 'CD4+ T cell', 'Megakaryocyte', 
+class_s = c('B cell', 'CD14+ monocyte', 'CD4+ T cell', 'Megakaryocyte', 
     'Natural killer cell', 'Dendritic cell', 'Cytotoxic T cell', 'CD16+ monocyte')
 # cell metadata
-cell_meta    = cell_meta_f %>% fread %>% .[-1] %>% setnames('CellType', 'cell_type') %>%
+cell_meta    = cell_meta_f %>% fread %>% .[-1] %>% setnames('CellType', 'class_') %>%
     .[nGene > min_genes & percent.mito < .1]  %>%
-    .[cell_type %in% cell_types] %>%
+    .[class_ %in% class_s] %>%
     .[grep('10x', Method), Method := '10x Chromium']
 cell_meta_1  = cell_meta[Experiment == 'pbmc1']
 cell_meta_2  = cell_meta[Experiment == 'pbmc2']
@@ -91,21 +94,58 @@ counts_mtx %<>% .[-grep('mt-', rownames(.)),] %>%
 gc()
 ```
 
+```{r remove, message=FALSE, warning=FALSE, paged.print=FALSE}
+mart = useMart('ensembl', dataset='hsapiens_gene_ensembl', host='www.ensembl.org')
+
+go_cellcycle = getBM(
+    attributes = c('ensembl_gene_id','external_gene_name'), 
+    filters    = 'go', 
+    values     = 'GO:0007049', 
+    mart       = mart)
+
+go_translation = getBM(
+    attributes = c('ensembl_gene_id','external_gene_name'), 
+    filters    = 'go', 
+    values     = 'GO:0006412', 
+    mart       = mart)
+
+go_ribosome1 = getBM(
+    attributes = c('ensembl_gene_id','external_gene_name'), 
+    filters    = 'go', 
+    values     = 'GO:0005840', 
+    mart       = mart)
+
+go_ribosome2 = getBM(
+    attributes = c('ensembl_gene_id','external_gene_name'), 
+    filters    = 'go', 
+    values     = 'GO:0042254', 
+    mart       = mart)
+
+ex_genes = unique(c(
+    go_cellcycle$external_gene_name, 
+    go_translation$external_gene_name, 
+    go_ribosome1$external_gene_name,
+    go_ribosome2$external_gene_name)) %>% tolower
+
+counts_mtx %<>% .[-which(rownames(.) %in% ex_genes),]
+gc()
+```
+
 ## Select cell types
 ```{r select, message=FALSE, warning=FALSE, paged.print=FALSE}
 # compute cell type frequencies
-cmp_pbmc1 = table(cell_meta_1$cell_type)
-cmp_pbmc2 = table(cell_meta_2$cell_type)
+cmp_pbmc1 = table(cell_meta_1$class_)
+cmp_pbmc2 = table(cell_meta_2$class_)
 # Select cell types with > 2000 samples within pbmc 1
 cmp_pbmc1 = ifelse(cmp_pbmc1 > min_cells, cmp_pbmc1, 0)
 # cmp_pbmc1['CD14+ monocyte'] = 0
 meta_sub_1 = cell_meta_1  %>%
-    .[, .SD[sample(1:dim(.SD)[1], min(min_cells, ..cmp_pbmc1[cell_type]))], by = 'cell_type']
+    .[, .SD[sample(1:dim(.SD)[1], min(min_cells, ..cmp_pbmc1[class_]))], by = 'class_']
 meta_sub_2 = cell_meta_2 %>%
     .[, .SD[sample(1:dim(.SD)[1],
-    min(..cmp_pbmc2[cell_type], ..cmp_pbmc2[cell_type]*..cmp_pbmc1[cell_type]))], by = 'cell_type']
-cmp_pbmc1 = table(meta_sub_1$cell_type)
-cmp_pbmc2 = table(meta_sub_2$cell_type)
+    min(..cmp_pbmc2[class_], ..cmp_pbmc2[class_]*..cmp_pbmc1[class_]))], by = 'class_']
+cmp_pbmc1 = table(meta_sub_1$class_)
+cmp_pbmc2 = table(meta_sub_2$class_)
 comp_all  = cbind(names(cmp_pbmc1), cmp_pbmc1, cmp_pbmc2) %>%
     as.data.table %>%
     setnames(c('type', 'pbmc1', 'pbmc2'))
@@ -127,17 +167,6 @@ rm(cell_meta)
 gc()
 ```
 
-<!-- ```{r hetmaps_1, message=FALSE, warning=FALSE, paged.print=FALSE}
-hm_comp = comp_all %>% melt(., id.vars='type') %>%
-    ggplot +
-    aes(x=variable, y=type, fill=as.numeric(value)) +
-    geom_tile() +
-    theme_bw() +
-    scale_fill_viridis(discrete=FALSE) 
-
-comp_all %>% ggplot +
-    aes()
-``` -->
 
 
 ## Normalizaiton
@@ -156,18 +185,20 @@ gc()
 
 ## Select highly variable genes
 ```{r hvg, message=FALSE, warning=FALSE, paged.print=FALSE}
+cd_genes    = rownames(norm_mtx_1)[grep('^cd[1-9]', rownames(norm_mtx_1))] 
 # select higly variable genes
 gene_vars_1 = modelGeneVar(as.matrix(norm_mtx_1))
-hvg1 = getTopHVGs(gene_vars_1) %>% .[1:1000]
+hvg1 = getTopHVGs(gene_vars_1) %>% .[1:n_hvgs]
 gene_vars_2 = modelGeneVar(as.matrix(norm_mtx_2))
-hvg2 = getTopHVGs(gene_vars_2) %>% .[1:1000]
-hvg  = intersect(hvg1, hvg2)
+hvg2 = getTopHVGs(gene_vars_2) %>% .[1:n_hvgs]
+# hvg  = intersect(hvg1, hvg2)
+hvg  = union(intersect(hvg1, hvg2), cd_genes)
 # subset pbmc2: genes
 data_pbmc2 = t(norm_mtx_2[hvg,])
-const_cols = which(colSds(as.matrix(data_pbmc2)) == 0)
-data_pbmc2 %<>% as.data.table %>% .[, -..const_cols] 
-# subset pbmc1: genes
 data_pbmc1 = t(norm_mtx_1[hvg,])
+
+const_cols = c(which(colSds(as.matrix(data_pbmc2)) == 0), which(colSds(as.matrix(data_pbmc1)) == 0))
+data_pbmc2 %<>% as.data.table %>% .[, -..const_cols] 
 data_pbmc1 %<>% as.data.table %>% .[, -..const_cols]
 # remove redundant objects
 rm(norm_mtx_1)
@@ -180,20 +211,20 @@ gc()
 ```{r ggm, message=FALSE, warning=FALSE, paged.print=FALSE}
 # pbmc 1
 ## penalization parameter
-ggm_pbmc1   = ggm(data_pbmc1, rho=.5, threshold =.05)
+ggm_pbmc1   = ggm(data_pbmc1, rho=rho_pbmc1, threshold =.04)
 ## exclude isolated nodes
 graph_pbmc1 = ggm_pbmc1$graph
 isolated_1  = which(degree(graph_pbmc1) == 0)
-# graph_pbmc1 = delete.vertices(graph_pbmc1, isolated_1)
+graph_pbmc1 = delete.vertices(graph_pbmc1, isolated_1)
 # ## graph weights
-# wi_pbmc1    = ggm_pbmc1$model$wi %>% .[-isolated_1, -isolated_1]
+wi_pbmc1    = ggm_pbmc1$model$wi %>% .[-isolated_1, -isolated_1]
 colnames(wi_pbmc1) = rownames(wi_pbmc1) = names(V(graph_pbmc1))
 diag(wi_pbmc1) = 0
 ## visualize graph
-# graph_pbmc1_f %>% pdf(width=5, height=5)
+graph_pbmc1_f %>% pdf(width=5, height=5)
 res_pbmc1   = graph_vis(graph_pbmc1, plot=T)
 title('(A) PBMC 1', line=2.5, sub=sprintf('gLasso, rho = %s', rho_pbmc1))
-# dev.off()
+dev.off()
 ## extract graph communities
 comm_pbmc1  = res_pbmc1$communities
 comm_dt_1   = data.table(GENE=names(comm_pbmc1), community=comm_pbmc1) %>%
@@ -201,30 +232,30 @@ comm_dt_1   = data.table(GENE=names(comm_pbmc1), community=comm_pbmc1) %>%
 # pbmc 2
 ## construct ggm
 keep_genes  = names(V(graph_pbmc1))
-ggm_pbmc2   = ggm(data_pbmc2[, ..keep_genes], rho=0.3, threshold = .05)
+ggm_pbmc2   = ggm(data_pbmc2[, ..keep_genes], rho=rho_pbmc2, threshold = .05)
 ## exclude isolated nodes
 graph_pbmc2 = ggm_pbmc2$graph
 isolated_2  = which(degree(graph_pbmc2)==0)
-# graph_pbmc2 = delete.vertices(graph_pbmc2, isolated_2)
+graph_pbmc2 = delete.vertices(graph_pbmc2, isolated_2)
 # ## graph weights
-# wi_pbmc2    = ggm_pbmc2$model$wi %>% .[-isolated_2, -isolated_2]
+wi_pbmc2    = ggm_pbmc2$model$wi %>% .[-isolated_2, -isolated_2]
 diag(wi_pbmc2) = 0
 colnames(wi_pbmc2) = rownames(wi_pbmc2) = names(V(graph_pbmc2))
 ## visualize graph
-# graph_pbmc2_f %>% pdf(width=5, height=5)
-# res_pbmc2   = graph_vis(graph_pbmc2, plot=T, groups=res_pbmc1$communities[-isolated_2])
+graph_pbmc2_f %>% pdf(width=5, height=5)
+res_pbmc2   = graph_vis(graph_pbmc2, plot=T, groups=res_pbmc1$communities[-isolated_2])
 res_pbmc2   = graph_vis(graph_pbmc2, plot=T, groups=res_pbmc1$communities)
 title('(B) PBMC 2', line=2.5, sub=sprintf('gLasso, rho = %s', rho_pbmc2))
-# dev.off()
+dev.off()
 ## extract graph communities
 comm_pbmc2  = res_pbmc2$communities
 comm_dt_2   = data.table(GENE=names(comm_pbmc2), community=comm_pbmc2) %>%
     setkey(community)
 # subset data: exclude isolated genes
-# data_pbmc1 %<>% as.matrix %>% .[, -isolated_1] 
-# data_pbmc2 %<>% as.matrix %>% .[, -isolated_1]
-data_pbmc1 %<>% as.matrix  
-data_pbmc2 %<>% as.matrix 
+data_pbmc1 %<>% as.matrix %>% .[, -isolated_1] 
+data_pbmc2 %<>% as.matrix %>% .[, -isolated_1]
+# data_pbmc1 %<>% as.matrix  
+# data_pbmc2 %<>% as.matrix 
 ```
 <!-- ```{r graph_comp, message=FALSE, warning=FALSE, paged.p rint=FALSE}
 adj_1 = ifelse(wi_pbmc1 != 0, 1, 0) 
@@ -238,7 +269,7 @@ umap_pbmc1 = uwot::umap(data_pbmc1)
 meta_sub_1[, c('umap1', 'umap2') := list(..umap_pbmc1[,1], ..umap_pbmc1[,2])]
 plot_pbmc1 = meta_sub_1 %>%
     ggplot(.) +
-    aes(umap1, umap2, color=cell_type) +
+    aes(umap1, umap2, color=class_) +
     geom_point(alpha=0.2) +
     theme_bw() + 
     theme(axis.text= element_blank()) +
@@ -249,7 +280,7 @@ umap_pbmc2  = uwot::umap(data_pbmc2)
 meta_sub_2[, c('umap1', 'umap2') := list(..umap_pbmc2[,1], ..umap_pbmc2[,2])]
 plot_pbmc2  = meta_sub_2 %>%
     ggplot(.) +
-    aes(umap1, umap2, color=cell_type) +
+    aes(umap1, umap2, color=class_) +
     geom_point(alpha = 0.2) +
     theme_bw() + 
     theme(axis.text = element_blank()) +
@@ -264,18 +295,18 @@ plot_pbmc2  = meta_sub_2 %>%
 ```{r save, message=FALSE, warning=FALSE, paged.print=FALSE}
 # analysis data
 ## pbmc 1
-# wi_pbmc1_f  %>% fwrite(wi_pbmc1, .)
-# comm_dt_1_f %>% fwrite(comm_dt_1, .)
-# ## pbmc2
-# wi_pbmc2_f  %>% fwrite(wi_pbmc2, .)
-# comm_dt_2_f %>% fwrite(comm_dt_2, .)
+wi_pbmc1_f  %>% fwrite(wi_pbmc1, .)
+comm_dt_1_f %>% fwrite(comm_dt_1, .)
+## pbmc2
+wi_pbmc2_f  %>% fwrite(wi_pbmc2, .)
+comm_dt_2_f %>% fwrite(comm_dt_2, .)
 # train & test data
-# adj_f     %>% fwrite(data.table(ifelse(abs(wi_pbmc1) > 0.1, 1, 0)), .)
-order_train = order(meta_sub_1$cell_type)
+adj_f     %>% fwrite(data.table(ifelse(abs(wi_pbmc1) > 0.04, 1, 0)), .)
+order_train = order(meta_sub_1$class_)
 train_X_f %>% fwrite(data.table(t(data_pbmc1[order_train,])), .)
 train_y_f %>% fwrite(meta_sub_1[order_train], .)
-order_test  = order(meta_sub_2$cell_type)
+order_test  = order(meta_sub_2$class_)
 test_X_f  %>% fwrite(data.table(t(data_pbmc2[order_test,])), .)
 test_y_f  %>% fwrite(meta_sub_2[order_test,], .)
-colnames(data_pbmc1) %>% write(gene_names_f)
+colnames(data_pbmc1) %>% write(feature_names_f)
 ```
