@@ -81,6 +81,19 @@ We use a well-known graph neural network called GraphSAGE. In GraphSAGE, each no
 
 As mentioned before, after training the graph neural network, we use captum to find the most important features, based on Integrated Gradients method (ref). The results are shown in fig (ref). We also compared the results to a FCNN which does not impose any structure on the input features. By comparison to the Human Protein Atlas, our results suggest how using graphical structure as an inductive bias leads to improvement in interpretation. While, FCNN can not fully capture marker genes of the PBMC cell types, GCN perfectly recovers the characteristic genes (ref). While, FCNN simply recovers the genes with the higher mean in each class, GCN recovers the true genes or gene modules which are known to contribute in cell identities. Both FCNN and GCN are optimized naively, by selecting a proper learning rate, dropout, and number of hidden layers and hidden nodes. 
 
+```{r freqs, message=FALSE, warning=FALSE, paged.print=FALSE, out.width='120%', fig.cap='The graphical abstract of scGCN.' , echo=F}
+knitr::include_graphics('../../output/pbmc/figures/Freqs.pdf')
+``` 
+
+```{r nets, message=FALSE, warning=FALSE, paged.print=FALSE, out.width='120%', fig.cap='The graphical abstract of scGCN.' , echo=F}
+knitr::include_graphics('../../output/pbmc/figures/Gene_Networks.pdf')
+``` 
+
+```{r preds, message=FALSE, warning=FALSE, paged.print=FALSE, out.width='120%', fig.cap='The graphical abstract of scGCN.' , echo=F}
+knitr::include_graphics('../../output/pbmc/figures/Predictions.pdf')
+``` 
+
+
 
 ## Classification based on genomic locations 
 TODO

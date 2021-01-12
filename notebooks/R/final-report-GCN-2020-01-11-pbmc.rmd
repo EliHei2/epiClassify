@@ -1,5 +1,5 @@
 ---
-title: "Final Report: Inception GCN"
+title: "Final Report: Structural Inductive Bias in Supervised Learning for Single-cell Data"
 author:
 - name: Elyas Heidari
   affiliation:
@@ -30,9 +30,11 @@ set.seed(1996)
 # imports
 suppressMessages(source('R/dep.R'))
 nice_cols_1   = c(
-    "#DC050C", "#FB8072", "#1965B0", "#7BAFDE", "#882E72", "#B17BA6", 
-    "#FF7F00", "#FDB462", "#E7298A", "#E78AC3", "#33A02C", "#B2DF8A", 
+    "#DC050C", "#FF7F00", "#FDB462", 
+    "#1965B0", "#7BAFDE", "#882E72", "#B2DF8A",  
+    "#B17BA6", "#E7298A", "#E78AC3", "#33A02C", 
     "#55A1B1", "#8DD3C7", "#A6761D", "#E6AB02", "#7570B3", "#BEAED4")
+
 nice_cols_2 = c("#666666", "#999999", "#aa8282", "#d4b7b7", "#8600bf", "#ba5ce3", 
     "#808000", "#aeae5c", "#1e90ff", "#00bfff", "#56ff0d", "#ffff00")
 # initialization
@@ -53,9 +55,10 @@ test_y_f  = file.path(data_input, 'classes_test.txt')
 # 
 MLP_f       = file.path(out_dir, 'importances/imp_MLP.txt')
 GraphSAGE_f = file.path(out_dir, 'importances/imp_GraphSAGE.txt')
+TransformerConv_f = file.path(out_dir, 'importances/imp_TransformerConv.txt')
 ## write
 ### plots
-umap_out  = file.path(out_dir, sprintf('layer_umaps_%s_GCN.pdf', time_stamp))
+umap_out  = file.path(out_dir, sprintf('umaps/umaps_%s_%s.pdf', '%s', time_stamp))
 graph_out = file.path(out_dir, sprintf('activations/graph_%s_%s.pdf', '%s', time_stamp))
 comm_out  = file.path(out_dir, sprintf('communities/graph_comm_hc_%s_%s.pdf', '%s', time_stamp))
 conf_out  = file.path(out_dir, sprintf('conf_%s_GCN.pdf', time_stamp))
@@ -77,34 +80,41 @@ train_X   = train_X_f %>% fread %>% as.matrix %>% t
 train_y   = train_y_f %>% fread  
 test_X    = test_X_f %>% fread %>% as.matrix %>% t 
 test_y    = test_y_f %>% fread  
-# train_y %>% .[grep('10x', Method), Method := '10x Chromium']
-# test_y %>% .[grep('10x', Method), Method := '10x Chromium']
+colnames(train_X) = colnames(test_X) = colnames(adj1)
+
 # grpah communities
 graph_com = comm_f %>% fread %>% 
     .[, color := nice_cols_1[community]] %>%
     setkey(GENE) %>%
     .[colnames(adj1)]
 
+# importance measures
 imp_MLP = MLP_f %>% fread %>%
     setkey('V1') %>%
-    .[colnames(adj1)] %>%
+    .[colnames(adj1)] 
+
+imp_MLP_mtx =  imp_MLP %>%
     .[, -c('V1')] %>%
     as.matrix %>%
     abs
 
 imp_GraphSAGE = GraphSAGE_f %>% fread %>%
     setkey('V1') %>%
-    .[colnames(adj1)] %>%
+    .[colnames(adj1)] 
+    
+imp_GraphSAGE_mtx =  imp_GraphSAGE %>%
     .[, -c('V1')] %>%
     as.matrix %>%
     abs
-# sig = sign(imp_MLP)
-# imp_MLP = log(imp_MLP * sig + 1)
 
-
-
-
-
+imp_TransformerConv = TransformerConv_f %>% fread %>%
+    setkey('V1') %>%
+    .[colnames(adj1)] 
+    
+imp_TransformerConv_mtx =  imp_TransformerConv %>%
+    .[, -c('V1')] %>%
+    as.matrix %>%
+    abs
 ```
 
 ## Graph Communities
@@ -137,18 +147,15 @@ lay_nc2 = layout_nicely(graph2)
 graph_col_comm(graph2, lay_nc2, graph_com$color, 5, title='PBMC 2', labels=graph_com$GENE)
 ```
 
-## Graphs
+## Cell type average activations
 ```{r graphs, message=FALSE, warning=FALSE, paged.print=FALSE}
 cell_type_graph <- function(type, title){
     sprintf(graph_out, paste0(title, '_train')) %>% pdf()
     train_idx = which(train_y$class_ == type)
     grp       = colMeans(train_X[train_idx,])
-    igraph::V(graph1)$color  = rgb(floor(255*(grp^(1/2))/max(grp^(1/2))), floor(255*(grp^(1/2))/max(grp^(1/2))), 0, maxColorValue=255, alpha=255)
-    # igraph::V(graph1)$color = grp
-    # grp_range   = c(min(grp)^(1/2)/max(grp^(1/2)),1)
-    # grp_vals    = seq(grp_range[1],grp_range[2],length.out=4)
-    # grp_cols    = circlize::colorRamp2(grp_vals, viridis::viridis(4))
-    # igraph::V(graph1)$color = grp_cols(grp^(1/2)/max(grp^(1/2)))
+    grp = (grp - mean(grp))/sd(grp) 
+    grp = grp + abs(min(grp))
+    igraph::V(graph1)$color  = rgb(floor(255*(grp^(0.5))/max(grp^(0.5)*1.1)), floor(255*(grp^(0.5))/max(grp^(0.5)*1.1)), 0, maxColorValue=255, alpha=255)
 
     plot.igraph(graph1,
         vertex.size = 5,
@@ -160,12 +167,9 @@ cell_type_graph <- function(type, title){
     sprintf(graph_out, paste0(title, '_test')) %>% pdf()
     test_idx = which(test_y$class_ == type)
     grp       = colMeans(test_X[test_idx,])
-    grp       = colMeans(train_X[train_idx,])
-    igraph::V(graph1)$color  = rgb(floor(255*(grp^(1/2))/max(grp^(1/2))), floor(255*(grp^(1/2))/max(grp^(1/2))), 0, maxColorValue=255, alpha=255)
-    # grp_range   = c(min(grp)^(1/2)/max(grp^(1/2)),1)
-    # grp_vals    = seq(grp_range[1],grp_range[2],length.out=4)
-    # grp_cols    = circlize::colorRamp2(grp_vals, viridis::viridis(4))
-    # igraph::V(graph1)$color = grp_cols(grp^(1/2)/max(grp^(1/2)))
+    grp = (grp - mean(grp))/sd(grp) 
+    grp = grp + abs(min(grp))
+    igraph::V(graph1)$color  = rgb(floor(255*(grp^(0.5))/max(grp^(0.5)*1.1)), floor(255*(grp^(0.5))/max(grp^(0.5)*1.1)), 0, maxColorValue=255, alpha=255)
     plot.igraph(graph1,
     vertex.size = 5,
     layout = lay_nc1,
@@ -177,64 +181,47 @@ cell_type_graph <- function(type, title){
 unique(train_y$class_) %>% map(~cell_type_graph(.x, .x))
 ```
 
-## Graphs
+## Cell type gene importances
 ```{r graphs, message=FALSE, warning=FALSE, paged.print=FALSE}
 cell_type_graph_imp <- function(dataset, type, title){
     sprintf(graph_out, title) %>% pdf()
     grp       = dataset[, type]
-    igraph::V(graph1)$color  = rgb(floor(255*(grp^(2))/max(grp^(2))), floor(255*(grp^(2))/max(grp^(2))), 0, maxColorValue=255, alpha=255)
-    # grp_range   = c(min(grp)^(1/2)/max(grp^(1/2)),1)
-    # grp_vals    = seq(grp_range[1],grp_range[2],length.out=3)
-    # grp_cols    = circlize::colorRamp2(grp_vals, viridis::viridis(3))
-    # igraph::V(graph1)$color = grp_cols(grp^(1/2)/max(grp^(1/2)))
+    grp = (grp - mean(grp))/sd(grp) 
+    grp = grp + abs(min(grp))
+    igraph::V(graph1)$color  = rgb(floor(255*(grp^(0.7))/max(grp^(0.7)*1.1)), floor(255*(grp^(0.7))/max(grp^(0.7)*1.1)), 0, maxColorValue=255, alpha=255)
     plot.igraph(graph1,
         vertex.size = 5,
         layout = lay_nc1,
         vertex.frame.color = igraph::V(graph1)$color,
         vertex.label = "",
-        main=title)
+        main='')
     dev.off()
 }
 
-unique(train_y$class_) %>% map(~cell_type_graph_imp(imp_MLP, .x, paste0(.x, '_MLP')))
-unique(train_y$class_) %>% map(~cell_type_graph_imp(imp_GraphSAGE, .x, paste0(.x, '_GraphSAGE')))
+unique(train_y$class_) %>% map(~cell_type_graph_imp(imp_MLP_mtx, .x, paste0(.x, '_MLP')))
+unique(train_y$class_) %>% map(~cell_type_graph_imp(imp_GraphSAGE_mtx, .x, paste0(.x, '_GraphSAGE')))
+unique(train_y$class_) %>% map(~cell_type_graph_imp(imp_TransformerConv_mtx, .x, paste0(.x, '_TransformerConv')))
 ```
 
-## Graphs
+## Marker Genes
 ```{r graphs, message=FALSE, warning=FALSE, paged.print=FALSE}
-cell_type_graph_layer <- function(type, title){
-    sprintf(graph_out, paste0(title, '_train_layer_2')) %>% pdf()
-    train_idx = which(train_y$cell_type == type)
-    grp       = colMeans(train_layers[[2]][train_idx,])
-    igraph::V(graph1)$color  = rgb(floor(255*(grp^(1/2))/max(grp^(2))), floor(255*(grp^(2))/max(grp^(2))), 0, maxColorValue=255, alpha=255)
-    # grp_range   = c(min(grp)^(2)/max(grp^(2)),1)
-    # grp_vals    = seq(grp_range[1],grp_range[2],length.out=3)
-    # grp_cols    = circlize::colorRamp2(grp_vals, viridis::viridis(3))
-    # igraph::V(graph1)$color = grp_cols(grp^(2)/max(grp^(2)))
-    plot.igraph(graph1,
-        vertex.size = 5,
-        layout = lay_nc1,
-        vertex.frame.color = igraph::V(graph1)$color,
-        vertex.label = "",
-        main=title)
-    dev.off()
-    sprintf(graph_out, paste0(title, '_test_layer_2')) %>% pdf()
-    test_idx = which(test_y$cell_type == type)
-    grp       = colMeans(test_layers[[2]][test_idx,])
-    igraph::V(graph1)$color  = rgb(floor(255*(grp^(2))/max(grp^(2))), floor(255*(grp^(2))/max(grp^(2))), 0, maxColorValue=255, alpha=255)
-    # grp_range   = c(min(grp)^(2)/max(grp^(1/2)),1)
-    # grp_vals    = seq(grp_range[1],grp_range[2],length.out=3)
-    # grp_cols    = circlize::colorRamp2(grp_vals, viridis::viridis(3))
-    # igraph::V(graph1)$color = grp_cols(grp^(1/2)/max(grp^(1/2)))
-    plot.igraph(graph1,
-    vertex.size = 5,
-    layout = lay_nc1,
-    vertex.label = "",
-    vertex.frame.color = igraph::V(graph1)$color)
-    dev.off()
-}
+markers_MLP = colnames(imp_MLP_mtx) %>% 
+    map(~colnames(adj1)[order(imp_MLP_mtx[,.x], decreasing=TRUE)[1:5]]) %>% 
+    setDT
+names(markers_MLP) = colnames(imp_MLP_mtx)
+markers_MLP
 
-unique(train_y$cell_type) %>% map(~cell_type_graph_layer(.x, .x))
+markers_GraphSAGE = colnames(imp_GraphSAGE_mtx) %>% 
+    map(~colnames(adj1)[order(imp_GraphSAGE_mtx[,.x], decreasing=TRUE)[1:5]]) %>% 
+    setDT
+names(markers_GraphSAGE) = colnames(imp_GraphSAGE_mtx)
+markers_GraphSAGE
+
+markers_TransformerConv = colnames(imp_TransformerConv_mtx) %>% 
+    map(~colnames(adj1)[order(imp_TransformerConv_mtx[,.x], decreasing=TRUE)[1:5]]) %>% 
+    setDT
+names(markers_TransformerConv) = colnames(imp_TransformerConv_mtx)
+markers_TransformerConv
 ```
 
 ## UMAPs
@@ -257,7 +244,7 @@ plot_umap <- function(mtx, cell_types, datasets, batches, title){
             panel.grid.minor = element_blank()) +
         scale_color_manual(values=nice_cols_1) +
         scale_shape_manual(values = c(1, 4)) +
-        labs(title=title, x='', y='')
+        labs(title=title, x='UMAP1', y='UMAP2')
     batch_umap = umap_dt %>%
         ggplot +
         aes(umap1, umap2, color=batch, shape=dataset, size=dataset, pch=10) +
@@ -270,95 +257,34 @@ plot_umap <- function(mtx, cell_types, datasets, batches, title){
             panel.grid.minor = element_blank()) +
         scale_color_manual(values=nice_cols_2) +
         scale_shape_manual(values = c(1, 4)) +
-        labs(title='', x='', y='')
+        labs(title='', x='UMAP1', y='UMAP2')
     list(type=type_umap, batch=batch_umap)
 }
 
 raw_layer  = rbind(train_X, test_X)
-sub_idx    = sample(1:dim(raw_layer)[1], 5000)
-# sub_idx    = 1:dim(raw_layer)[1]
-cell_types = c(train_y$cell_type, test_y$cell_type)[sub_idx]
-batches    = c(train_y$condition, test_y$condition)[sub_idx]
+# sub_idx    = sample(1:dim(raw_layer)[1], 10000)
+sub_idx    = 1:dim(raw_layer)[1]
+cell_types = c(train_y$class_, test_y$class_)[sub_idx]
+batches    = c(train_y$Method, test_y$Method)[sub_idx]
 datasets   = c(rep('training', dim(train_X)[1]), rep('test', dim(test_X)[1]))[sub_idx]
-umap_raw   = list(plot_umap(raw_layer[sub_idx,], cell_types, datasets, batches, 'raw data'))
 
-raw_layer  = list(rbind(train_X, test_X))
-layers = 1:2 %>% map(~rbind(train_layers[[.x]], test_layers[[.x]]))
-umaps  = 1:2 %>% map(~ plot_umap(layers[[.x]][sub_idx,], cell_types, datasets, batches, paste('layer', .x)))
-umaps  = append(umap_raw, umaps)
-umap_plt    =  (umaps[[1]]$type + umaps[[2]]$type + umaps[[3]]$type  +
-    umaps[[1]]$batch + umaps[[2]]$batch + umaps[[3]]$batch ) +
-    plot_layout(guides = 'collect', nrow=2)
-umap_out %>% ggsave(umap_plt, filename=., width=15, height=7, device='pdf')
-```
+umap_raw   = plot_umap(raw_layer[sub_idx,], cell_types, datasets, batches, 'raw data')
 
+TC_markers = c(unlist(markers_TransformerConv[1:2]))
+umap_TC   = plot_umap(raw_layer[sub_idx, TC_markers], cell_types, datasets, batches, 'TranformerConv')
 
+MLP_markers = c(unlist(markers_MLP[1:2]))
+umap_MLP   = plot_umap(raw_layer[sub_idx, MLP_markers], cell_types, datasets, batches, 'MLP')
 
-```{r heatmaps, message=FALSE, warning=FALSE, paged.print=FALSE}
-hm_conf <- function(dt, acc, dat){
-    melt(dt, id.vars='type') %>%
-        .[, `row scaled freq.` := value/sum(value), by= 'variable'] %>%
-        ggplot +
-        aes(x=type, y=variable, fill=`row scaled freq.`) +
-        geom_tile(colour = "white") +
-        geom_text(aes(label=value), colour = "white") +
-        theme_void()+
-        theme(axis.ticks= element_blank()) +
-        labs(y='True cell type', x='Predicted cell type', title=sprintf('%s accuracy = %s', dat, acc))
-}
-
-cell_types = c('B', 'CD14+', 'CD16+', 'CD4+', 'Cyto', 'Dend.', 'Mega.', 'NK')
-train_dt = data.table(type=cell_types, 
-        `B`     = c(146, 1, 0, 1, 1, 1, 0, 0),
-        `CD14+` = c(0, 131, 6, 2, 2, 4, 5, 0),
-        `CD16+` = c(0, 4, 143, 0, 1, 1, 1, 0),
-        `CD4+`  = c(0, 3, 1, 116, 23, 1, 0, 6),
-        `Cyto.` = c(2, 2, 1, 16, 115, 0, 1, 13),
-        `Dend.` = c(0, 3, 0, 1, 0, 145, 0, 1),
-        `Mega.` = c(1, 2, 0, 1, 2, 0, 144, 0),
-        `NK`    = c(0, 0, 0, 2, 12, 1, 0, 135))
-conf_trian = train_dt %>% hm_conf(acc=0.896, dat='training')
-test_dt = data.table(type=cell_types, 
-        `B`     = c(2403, 13, 0, 4, 5, 17, 8, 0),
-        `CD14+` = c(2, 1328, 18, 1, 5, 225, 3, 0),
-        `CD16+`  = c(0, 40, 173, 1, 0, 15, 1, 0),
-        `CD4+`  = c(40, 24, 3, 2531, 196, 3, 35, 0),
-        `Cyto.`  = c(28, 18, 0, 188, 1734, 2, 19, 125),
-        `Dend.` = c(9, 46, 1, 0, 1, 148, 2, 0),
-        `Mega.` = c(0, 7, 0, 0, 3, 0, 51, 0),
-        `NK`   = c(2, 5, 1, 0, 142, 7, 4, 530))
-conf_test = test_dt %>% hm_conf(acc=0.875, dat='test')
-conf_hm   = conf_trian + conf_test +
+umap_plt    =  (umap_raw$type + umap_raw$batch) +
     plot_layout(guides = 'collect')
+sprintf(umap_out, 'raw') %>% ggsave(umap_plt, filename=., width=15, height=7, device='pdf')
 
-Epoch 31:
-train: loss=0.001, acc=0.928
-test: loss=0.000, acc=0.863
----------------
-train confusion matrix:
- [[149   1   0   0   0   0   0   0]
- [  0 146   0   0   1   1   2   0]
- [  0   0 150   0   0   0   0   0]
- [  0   1   0 124  24   0   0   1]
- [  1   1   0   7 141   0   0   0]
- [  0   2   0   0   0 148   0   0]
- [  0   0   0   0   0   0 150   0]
- [  0   0   0   3  41   1   0 105]]
-test confusion matrix:
- [[2415    1    0   20    8    4    2    0]
- [  43 1322   19    8    3  181    6    0]
- [   7   22  195    0    3    1    2    0]
- [  24   18    0 2576  207    0    6    1]
- [  22    6    0  449 1533    0    8   96]
- [  33   15    0    0    1  156    2    0]
- [   0    7    0    1    1    1   51    0]
- [   3    0    0    3  159    0    0  526]]
-                                                               
-#  [  36   26  547 1505]]  
-```
+umap_plt    =  (umap_TC$type + umap_TC$batch) +
+    plot_layout(guides = 'collect')
+sprintf(umap_out, 'TC') %>% ggsave(umap_plt, filename=., width=15, height=7, device='pdf')
 
-## Save results
-```{r name, message=FALSE, warning=FALSE, paged.print=FALSE}
-umap_out %>% ggsave(umap_plt, filename=., width=15, height=7, device='pdf')
-conf_out %>% ggsave(conf_hm, filename=., width=11, height=5, device='pdf')
+umap_plt    =  (umap_MLP$type + umap_MLP$batch) +
+    plot_layout(guides = 'collect')
+sprintf(umap_out, 'MLP') %>% ggsave(umap_plt, filename=., width=15, height=7, device='pdf')
 ```

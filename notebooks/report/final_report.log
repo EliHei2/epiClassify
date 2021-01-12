@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017) (preloaded format=pdflatex 2018.1.27)  11 JAN 2021 16:53
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017) (preloaded format=pdflatex 2018.1.27)  12 JAN 2021 09:02
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1207,6 +1207,7 @@ ABD: EverySelectfont initializing macros
 LaTeX Info: Redefining \selectfont on input line 137.
 Package caption Info: Begin \AtBeginDocument code.
 Package caption Info: End \AtBeginDocument code.
+Package caption Info: We need package `ragged2e' on input line 137.
 LaTeX Font Info:    Try loading font information for T1+phv on input line 138.
 (/usr/local/texlive/2017basic/texmf-dist/tex/latex/psnfss/t1phv.fd
 File: t1phv.fd 2001/06/04 scalable font definitions for T1/phv.
@@ -1284,10 +1285,7 @@ LaTeX Font Info:    Font shape `T1/phv/bx/n' in size <10> not available
 (Font)              Font shape `T1/phv/b/n' tried instead on input line 139.
 (./final_report.toc [1
 
-{/usr/local/texlive/2017basic/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
-LaTeX Font Info:    Font shape `T1/fvm/m/n' will be
-(Font)              scaled to size 9.57605pt on input line 21.
-)
+{/usr/local/texlive/2017basic/texmf-var/fonts/map/pdftex/updmap/pdftex.map}])
 \tf@toc=\write6
 \openout6 = `final_report.toc'.
 
@@ -1295,81 +1293,126 @@ LaTeX Font Info:    Font shape `T1/fvm/m/n' will be
 
 LaTeX Warning: Reference `fig:schema' on page 3 undefined on input line 156.
 
-[3] [4]
-LaTeX Font Info:    Try loading font information for T1+lmr on input line 216.
+[3] [4] [5]
+LaTeX Font Info:    Try loading font information for T1+lmr on input line 218.
 (/usr/local/texlive/2017basic/texmf-dist/tex/latex/lm/t1lmr.fd
 File: t1lmr.fd 2009/10/30 v1.6 Font defs for Latin Modern
-) [5] [6]
+)
+<../../output/pbmc/figures/Freqs.pdf, id=166, 361.08994pt x 303.33366pt>
+File: ../../output/pbmc/figures/Freqs.pdf Graphic file (type pdf)
+<use ../../output/pbmc/figures/Freqs.pdf>
+Package pdftex.def Info: ../../output/pbmc/figures/Freqs.pdf  used on input lin
+e 223.
+(pdftex.def)             Requested size: 361.11107pt x 303.35143pt.
 
-Package hyperref Warning: The anchor of a bookmark and its parent's must not
-(hyperref)                be the same. Added a new anchor on input line 249.
+Overfull \hbox (19.67798pt too wide) in paragraph at lines 223--223
+[][] 
+ []
 
-[7]
-LaTeX Font Info:    Font shape `T1/fvm/m/n' will be
-(Font)              scaled to size 13.7895pt on input line 279.
-[8]
+LaTeX Font Info:    Font shape `T1/phv/bx/n' in size <8> not available
+(Font)              Font shape `T1/phv/b/n' tried instead on input line 223.
+
+Overfull \hbox (42.67912pt too wide) in paragraph at lines 223--223
+[] [] 
+ []
+
+<../../output/pbmc/figures/Gene_Networks.pdf, id=167, 542.025pt x 782.925pt>
+File: ../../output/pbmc/figures/Gene_Networks.pdf Graphic file (type pdf)
+<use ../../output/pbmc/figures/Gene_Networks.pdf>
+Package pdftex.def Info: ../../output/pbmc/figures/Gene_Networks.pdf  used on i
+nput line 227.
+(pdftex.def)             Requested size: 409.73502pt x 591.8395pt.
+
+Overfull \hbox (68.30193pt too wide) in paragraph at lines 227--227
+[][] 
+ []
+
+
+Overfull \hbox (42.67912pt too wide) in paragraph at lines 227--227
+[] [] 
+ []
+
+<../../output/pbmc/figures/Predictions.pdf, id=168, 616.02014pt x 539.18626pt>
+File: ../../output/pbmc/figures/Predictions.pdf Graphic file (type pdf)
+<use ../../output/pbmc/figures/Predictions.pdf>
+Package pdftex.def Info: ../../output/pbmc/figures/Predictions.pdf  used on inp
+ut line 231.
+(pdftex.def)             Requested size: 409.72345pt x 358.62018pt.
+
+Overfull \hbox (68.29036pt too wide) in paragraph at lines 231--231
+[][] 
+ []
+
+
+Overfull \hbox (42.67912pt too wide) in paragraph at lines 231--231
+[] [] 
+ []
+
+[6] [7 <../../output/pbmc/figures/Freqs.pdf>] [8 <../../output/pbmc/figures/Gen
+e_Networks.pdf>] [9 <../../output/pbmc/figures/Predictions.pdf>]
+
+LaTeX Warning: Reference `fig:graphs' on page 10 undefined on input line 257.
+
+
+LaTeX Warning: Reference `fig:graphs' on page 10 undefined on input line 259.
+
+
+LaTeX Warning: Reference `fig:graphs' on page 10 undefined on input line 259.
+
+
+LaTeX Warning: Reference `fig:graphs' on page 10 undefined on input line 259.
+
+
+LaTeX Warning: Reference `fig:abstract' on page 10 undefined on input line 264.
+
+
+
+LaTeX Warning: Reference `fig:confs' on page 10 undefined on input line 264.
+
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <8> on input line 300.
+(Font)              <8> on input line 264.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <6> on input line 300.
+(Font)              <6> on input line 264.
+[10
 
-LaTeX Warning: Reference `fig:graphs' on page 9 undefined on input line 315.
+]
 
-
-LaTeX Warning: Reference `fig:graphs' on page 9 undefined on input line 317.
-
-
-LaTeX Warning: Reference `fig:graphs' on page 9 undefined on input line 317.
+LaTeX Warning: Reference `fig:umaps' on page 11 undefined on input line 271.
 
 
-LaTeX Warning: Reference `fig:graphs' on page 9 undefined on input line 317.
-
-[9]
-
-LaTeX Warning: Reference `fig:abstract' on page 10 undefined on input line 322.
+LaTeX Warning: Reference `fig:umaps' on page 11 undefined on input line 271.
 
 
-
-LaTeX Warning: Reference `fig:confs' on page 10 undefined on input line 322.
-
-
-LaTeX Warning: Reference `fig:umaps' on page 10 undefined on input line 329.
+LaTeX Warning: Reference `fig:schema' on page 11 undefined on input line 280.
 
 
-LaTeX Warning: Reference `fig:umaps' on page 10 undefined on input line 329.
-
-[10]
-
-LaTeX Warning: Reference `fig:schema' on page 11 undefined on input line 338.
+LaTeX Warning: Reference `fig:schema' on page 11 undefined on input line 281.
 
 
-LaTeX Warning: Reference `fig:schema' on page 11 undefined on input line 339.
+LaTeX Warning: Reference `fig:umaps' on page 11 undefined on input line 285.
 
-
-LaTeX Warning: Reference `fig:umaps' on page 11 undefined on input line 343.
-
-[11] [12]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 403.
-[13]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 403.
+[11] [12] [13]
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 327.
+[14]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 327.
 (./final_report.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 403.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 403.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 327.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 327.
 Package rerunfilecheck Info: File `final_report.out' has not changed.
-(rerunfilecheck)             Checksum: AAB8C2BC32DBB8F5F7FCF70180D86D70;1835.
+(rerunfilecheck)             Checksum: D46554D6A9BEA33E2F955850878770B0;1350.
 
 LaTeX Warning: There were undefined references.
 
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 403.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 327.
  ) 
 Here is how much of TeX's memory you used:
- 14211 strings out of 494437
- 220205 string characters out of 6166645
- 342702 words of memory out of 5000000
- 17028 multiletter control sequences out of 15000+600000
- 112117 words of font info for 142 fonts, out of 8000000 for 9000
+ 14188 strings out of 494437
+ 220165 string characters out of 6166645
+ 340611 words of memory out of 5000000
+ 17030 multiletter control sequences out of 15000+600000
+ 115005 words of font info for 138 fonts, out of 8000000 for 9000
  319 hyphenation exceptions out of 8191
- 43i,14n,45p,1505b,495s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 43i,13n,45p,1518b,495s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2017basic/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/usr/l
 ocal/texlive/2017basic/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}{/usr/local/
 texlive/2017basic/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/usr/local/texlive/2
@@ -1389,10 +1432,10 @@ exlive/2017basic/texmf-dist/fonts/type1/public/lm/lmsy10.pfb></usr/local/texliv
 e/2017basic/texmf-dist/fonts/type1/public/lm/lmsy7.pfb></usr/local/texlive/2017
 basic/texmf-dist/fonts/type1/urw/helvetic/uhvb8a.pfb></usr/local/texlive/2017ba
 sic/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb>
-Output written on final_report.pdf (13 pages, 246805 bytes).
+Output written on final_report.pdf (14 pages, 492396 bytes).
 PDF statistics:
- 371 PDF objects out of 1000 (max. 8388607)
- 312 compressed objects within 4 object streams
- 86 named destinations out of 1000 (max. 500000)
- 14545 words of extra memory for PDF output out of 17280 (max. 10000000)
+ 401 PDF objects out of 1000 (max. 8388607)
+ 325 compressed objects within 4 object streams
+ 68 named destinations out of 1000 (max. 500000)
+ 14504 words of extra memory for PDF output out of 17280 (max. 10000000)
 
