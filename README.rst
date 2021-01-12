@@ -100,9 +100,9 @@ The extended version of the report for this project can be found `here <https://
 
 Reproducing the report figures/tables
 **********************
-- Preprocessing: notebooks/GNN_input_prep_pbmc.rmd
-- Traning classifiers and finding important featuers: notebooks/PBMC_captum.ipynb
-- Post analysis and visualization: notebooks/final-report-GCN-2020-01-11-pbmc.rmd
+- `Preprocessing <https://github.com/EliHei2/scPotter/notebooks/GNN_input_prep_pbmc.rmd>`_
+- `Traning classifiers and finding important featuers <https://github.com/EliHei2/scPotter/notebooks/PBMC_captum.ipynb>`_
+- `Post analysis and visualization <https://github.com/EliHei2/scPotter/notebooks/final-report-GCN-2020-01-11-pbmc.rmd>`_
 
 
 Support and contribute
