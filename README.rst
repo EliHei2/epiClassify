@@ -1,13 +1,15 @@
 
 
 
-GNNProject: Graph-Structured Inductive Bias in Deep Learning
+scPotter: Structural Inductive Bias in Supervised Learning for Single-cell Data
 =========================================================================
 .. raw:: html
 
-We investigate to which extent inferring the graph structure from the data and using it as an inductive bias to a Graph Neural Network (GNN) improves robustness and generalization in comparison to the standard fully connected neural networks (FCNN) without any prior structural information. Furthermore, we explore how the quality of an inductive bias (i.e., the graph structure reconstructed from the high-dimentional data) impacts the performance. To that end, we carry out multiple experiments with both synthetic and real datasets, to compare performance of GNNs and FCNNs in various settings, varying characteristics of the input dataset, such as number of features, number of observations, noise level, or quality of the input structure. 
+scPotter takes feature interactions (e.g., gene-gene interactions) into account to classify single-cells and interpret the marker genes. 
 
-The models are implemented with `pytorch <https://pytorch.org/docs/stable/index.html>`_ and `pytorch-geometric <https://pytorch-geometric.readthedocs.io/en/latest/>`_ in python.
+scPotter is an end-to-end pipeline for 1) annotation 2) finding the most important features for each annotation category. The backbone is adopted from two of the packages, previously developed by us, GNNProject [GitHub.com/e-sollier/DL2020](https://github.com/e-sollier/DL2020) in python and scGCNUtiles [GitHub.com/EliHei2/scGCN](https://github.com/EliHei2/scGCN) in R. Many models from synthetic data generation to multiple neural network classifiers are implemented along with tools for visualization and exploratory data analysis. The modular structure of the pipeline enables extensions to new models and analyses. The pipeline is designed to meet state of the art reproducibility standards and criteria of open science, such as coherence, integrity, documentation, and readability.
+
+The models are implemented with `pytorch <https://pytorch.org/docs/stable/index.html>`_ and `pytorch-geometric <https://pytorch-geometric.readthedocs.io/en/latest/>`_ in python. Some tools for preprocessing, visualization and exploratory data analysis are implemented in R.
 
 **NOTE:** Here, we talk about graph classification, where each observation to be classified is represented by a graph, with nodes representing features. The graph structure for all observations is the same, the only difference comes from node values.
 
@@ -17,7 +19,8 @@ Modules
 
 Synthetic data generation
 **********************
-We generate graph structured, labeled, synthetic data inspired by biological networks. It consists of two steps:
+We generate graph structured, labeled, synthetic data inspired by gene regulatory networks. It consists of two steps:
+
 1. Random Graph Generation:
 
 - **Erdős–Rényi model:** To generate plane random networks based on `Erdős & Rényi, 1959 <https://en.wikipedia.org/wiki/Barabási–Albert_model>`_)
@@ -35,9 +38,9 @@ This happens once the graph is generated and the nodes are initialized by a Gaus
 
 - **Sign:** Sign of characteristic nodes is set based on the sign of average of their neighbors. 
 
-Real data
+PBMC data
 **********************
-Our framework is applicable to any kind of (n_obs * n_features) multi-class dataset, as it is able to reconstruct the underlying graph. Indeed, the performance is better when there is an underlying dependence structure among features. A sample real dataset can be found `here <https://polybox.ethz.ch/index.php/s/12DdfFYADCetsNE>`_. This is a preprocessed version of `this dataset <https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE132044>`_.
+The dataset contains two separate experiments, hereafter called PBMC 1 and PBMC 2, generated in a single center, but employing seven different scRNA-seq methods. Both datasets are annotated by cell types which can be used to train and validate our classifiers. This suits our goal to verify our framework on a simulated task of real transfer learning. As in potential applications we expect our methods to learn annotation priorly on the complete (training) dataset and transfer the learned model to annotate the unseen (test) one. The raw dataset is available on the Gene Expression Omnibus with accession number [GSE132044](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE132044). The preprocessed dataset is available [here](https://polybox.ethz.ch/index.php/s/8cm5WSz70Wq5vmQ).
 
 Graph inference
 **********************
@@ -54,6 +57,8 @@ We use GNNs and compare them with FCNNs as baselines. We define GNNs based on `m
  - `GIN <https://pytorch-geometric.readthedocs.io/en/latest/modules/nn.html#torch_geometric.nn.conv.GINConv>`_ 
  - `GATConv (graph attention) <https://pytorch-geometric.readthedocs.io/en/latest/modules/nn.html#torch_geometric.nn.conv.GATConv>`_
  - `TransformerConv <https://pytorch-geometric.readthedocs.io/en/latest/modules/nn.html#torch_geometric.nn.conv.TransformerConv>`_
+ 
+ Also a 1-d Convolutional Neural Network is implemented for the applications where the structure is linear, e.g., genomic locations.
 
 
 Usage and installation
@@ -61,7 +66,7 @@ Usage and installation
 You can get the latest development version of our toolkit from `Github <https://github.com/e-sollier/DL2020/>`_ using the following steps:
 First, clone the repository using ``git``::
 
-    git clone https://github.com/e-sollier/DL2020
+    git clone https://github.com/EliHei2/scPotter
 
 Then, ``cd`` to the scArches folder and run the install command::
 
@@ -91,26 +96,19 @@ To see some examples of our pipeline's capability, look at the `notbooks` direct
 
 Final Report
 -------------------------------
-The extended version of the report for this project can be found `here <https://polybox.ethz.ch/index.php/s/FYnQKXRfeWoHlqO>`_.
+The extended version of the report for this project can be found `here <https://github.com/EliHei2/scPotter/tree/main/notebooks/report>`_.
 
-Reproducing the report figures 
+Reproducing the report figures/tables
 **********************
-- Fig. 1: `Experiments/run_batch_graphQual.sh` --> `Experiments/read_results_graphQual.sh`
-- Fig. 2: `Experiments/run_batch_obs.sh` --> `Experiments/read_results_obs.sh`
-- Fig. 3: `Experiments/run_batch_features.sh` --> `Experiments/read_results_features.sh`
-- Fig. 4: `Experiments/run_batch_real.sh` --> `Experiments/read_results_real.sh`
-- Fig. 5: `Experiments/run_batch_noise.sh` --> `Experiments/read_results_noise.sh`
-- Fig. 6: `Experiments/run_batch_layers.sh` --> `Experiments/read_results_layers.sh`
-- Fig. 7: `Experiments/run_batch_alpha.sh` --> `Experiments/read_results_alpha.sh`
-- Fig. 8: `notebooks/EBIC_analysis_optimal_alpha.ipynb`
-Reproducing the report table 
-**********************
-- table 1: `notebooks/EBIC_analysis_optimal_alpha.ipynb`
+- Preprocessing: notebooks/GNN_input_prep_pbmc.rmd
+- Traning classifiers and finding important featuers: notebooks/PBMC_captum.ipynb
+- Post analysis and visualization: notebooks/final-report-GCN-2020-01-11-pbmc.rmd
+
 
 Support and contribute
 -------------------------------
 If you have a question or new architecture or a model that could be integrated into our pipeline, you can
-post an `issue <https://github.com/e-sollier/DL2020/issues/new>`__ or reach us by `email <mailto:eheidari@student.ethz.ch, esollier@student.ethz.ch, azagidull@student.ethz.ch>`_.
+post an `issue <https://github.com/EliHei2/scPotter/issues/new>`__ or reach us by `email <mailto:eheidari@student.ethz.ch>`_.
 
 
 
