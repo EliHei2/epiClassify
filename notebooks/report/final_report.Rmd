@@ -101,30 +101,33 @@ knitr::include_graphics('../../output/pbmc/figures/Predictions.pdf')
 ``` 
 
 # Discussion
-We developed new tools for leveraging gene interactions in single-cell data analysis. We showed that how such a structural information could be employed as an inductive bias for better generalization and interpretation. This project was simply a proof of concept but it sheds light on the importance and utility of interaction networks in the field of single-cell and even more, in other biological applications. 
+We developed new tools for leveraging gene interactions in single-cell data analysis. We showed that how such a structural information could be employed as an inductive bias for better generalization and interpretation. This project was simply a proof of concept but it sheds light on the importance and utility of interaction networks in the field of single-cell and even more, in other biological applications. The advantage of this approach over similar approaches in contemporary single-cell field is that it can perform both forward and backward tasks of supervised learning in one pipeline, also it is a generic approach that can be well generalized to any biological application, where the task is annotation. 
 
 ## Gene network reconstruction and transferability 
 We reconstructed gene interaction networks, without any prior knowledge, using the graphical lasso. The graphical lasso leads to sparse yet modular solutions on scRNA-seq data, as shown in Fig. \@ref(fig:nets). This is in line with the fact that the true underlying gene regulatory networks are essentially sparse. Moreover, sparsity reduces the estimation noise and ensures the accuracy of the graph representation. Therefore, imposing such an inductive bias in the GCN framework through the graph structure improves the performance through regularization of the parameter space. One can also compare Fig. \@ref(fig:nets)-A and Fig. \@ref(fig:nets)-B, where the gene-interaction networks are reconstructed on two separate PBMC datasets. Higher compatibility will lead to better transferability of the model along environments. We observe that many gene communities from the PBMC 1 are conversed on the PBMC 2 dataset; suggesting that graphical lasso is a reliable method for reconstructing gene networks with scRNA-seq data, in that, it preserves the global network structures. 
 
-## Potential applications
-Although here we just focused on gene-gene interaction networks and reconstructed them, the pipeline can be also used on other data modalities (e.g., chromatin structure), where the interaction network is already given. For instance, Hi-C data [@hic] can be used to reconstruct genomic interaction networks, and the rest of the pipeline, that is, classification and interpretation can be used as is, to find marker genomic locations. 
 
-Genomic locations and gene proximity on chromosomes can be used as an additional information for cell annotation. The approach is inspired by the fact that genes in proximity on the chromosomes, are more likely to undergo the same epigenetic events, such as chromatin openness and genomic interactions (e.g., in topologically associating domains, TADs). One can sort genes based on genomic locations. By doing so, each cell can be represented as either a 1-dimensional signal in which each (time) point represents the expression/activation level of the corresponding gene, or a linear graph in which each node is assigned by the expression level of the corresponding gene. By such a modeling, one can use both 1-dimensional Convolutional Neural Networks and Graph Neural Networks. Both of these models are implemented in our pipeline (discussed later), to perform supervised learning.
 
 ## Software developed
-## Future steps
+We developed scPotter [GitHub.com/EliHei2/scPotter](https://github.com/EliHei2/scPotter) as an end-to-end pipeline for 1) annotation 2) finding the most important features for each annotation category. The backbone is adopted from two of the packages, previously developed by us, GNNProject [GitHub.com/e-sollier/DL2020](https://github.com/e-sollier/DL2020) in python and scGCNUtiles [GitHub.com/EliHei2/scGCN](https://github.com/EliHei2/scGCN) in R. Many models from synthetic data generation to multiple neural network classifiers are implemented along with tools for visualization and exploratory data analysis. The modular structure of the pipeline enables extensions to new models and analyses. The pipeline is designed to meet state of the art reproducibility standards and criteria of open science, such as coherence, integrity, documentation, and readability.
+
+## Potential applications and future steps
+Although here we just focused on gene-gene interaction networks and reconstructed them, the pipeline can be also used on other data modalities (e.g., chromatin structure), where the interaction network is already given. For instance, Hi-C data [@hic] can be used to reconstruct genomic interaction networks, and the rest of the pipeline, that is, classification and interpretation can be used as is, to find marker genomic locations. 
+
+Genomic locations and gene proximity on chromosomes can be used as an additional information for cell annotation. The approach is inspired by the fact that genes in proximity on the chromosomes, are more likely to undergo the same epigenetic events, such as chromatin openness and genomic interactions (e.g., in topologically associating domains, TADs). One can sort genes based on genomic locations. By doing so, each cell can be represented as either a 1-dimensional signal in which each (time) point represents the expression/activation level of the corresponding gene, or a linear graph in which each node is assigned by the expression level of the corresponding gene. By such a modeling, one can use both 1-dimensional Convolutional Neural Networks and Graph Neural Networks. Both of these models are implemented in our pipeline, to perform supervised learning.
 
 
 
 \newpage
-# Acknowledgments {.unnumbered}
+### Acknowledgments {.unnumbered}
 Hereby, I want to appreciate extremely helpful comments of Will Macnair, Izaksun Maluma, and Stephany Orjuela. I thank my collaborators in the related previous projects, Laleh Haghverdi and Etienne Sollier. Finally, I express my regards to the STA426 instructors, Mark Robinson, Hubert Rehrauer, and Ahmadreza Yousefkhani for motivating me to conduct this piece of research.
 
 
-# Code and data availability {.unnumbered}
+### Data availability {.unnumbered}
+The raw real dataset is available on the Gene Expression Omnibus with accession number [GSE132044](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE132044). The preprocessed dataset is available [here](https://polybox.ethz.ch/index.php/s/12DdfFYADCetsNE).
 
-- Code: [GitHub repository](https://github.com/EliHei2/scGCN) 
-- PBMC dataset: [link](https://singlecell.broadinstitute.org/single_cell/study/SCP424/single-cell-comparison-pbmc-data)
+### Supplementary information {.unnumbered}
+The intermediate results and the supplementary information are available on the [project's GitHub repository](https://github.com/EliHei2/scPotter/output).
 
 <!-- # Appendix {.unnumbered}
 ## Glossary {.unnumbered}

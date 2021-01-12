@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017) (preloaded format=pdflatex 2018.1.27)  12 JAN 2021 14:36
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017) (preloaded format=pdflatex 2018.1.27)  12 JAN 2021 15:02
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1286,14 +1286,15 @@ LaTeX Font Info:    Font shape `T1/fvm/m/n' will be
 (Font)              scaled to size 7.98004pt on input line 139.
 LaTeX Font Info:    Font shape `T1/phv/bx/n' in size <10> not available
 (Font)              Font shape `T1/phv/b/n' tried instead on input line 140.
-(./final_report.toc [1
-
-{/usr/local/texlive/2017basic/texmf-var/fonts/map/pdftex/updmap/pdftex.map}])
+(./final_report.toc)
 \tf@toc=\write6
 \openout6 = `final_report.toc'.
 
-[2]
-<../../output/pbmc/figures/schema.pdf, id=124, 963.6pt x 542.025pt>
+[1
+
+{/usr/local/texlive/2017basic/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] [2
+]
+<../../output/pbmc/figures/schema.pdf, id=108, 963.6pt x 542.025pt>
 File: ../../output/pbmc/figures/schema.pdf Graphic file (type pdf)
 <use ../../output/pbmc/figures/schema.pdf>
 Package pdftex.def Info: ../../output/pbmc/figures/schema.pdf  used on input li
@@ -1307,7 +1308,7 @@ Overfull \hbox (42.67912pt too wide) in paragraph at lines 158--158
  []
 
 [3 <../../output/pbmc/figures/schema.pdf>] [4]
-<../../output/pbmc/figures/Freqs.pdf, id=188, 361.08994pt x 303.33366pt>
+<../../output/pbmc/figures/Freqs.pdf, id=171, 361.08994pt x 303.33366pt>
 File: ../../output/pbmc/figures/Freqs.pdf Graphic file (type pdf)
 <use ../../output/pbmc/figures/Freqs.pdf>
 Package pdftex.def Info: ../../output/pbmc/figures/Freqs.pdf  used on input lin
@@ -1318,7 +1319,7 @@ Overfull \hbox (42.67912pt too wide) in paragraph at lines 205--205
 [] [] 
  []
 
-<../../output/pbmc/figures/Gene_Networks.pdf, id=194, 542.025pt x 782.925pt>
+<../../output/pbmc/figures/Gene_Networks.pdf, id=177, 542.025pt x 782.925pt>
 File: ../../output/pbmc/figures/Gene_Networks.pdf Graphic file (type pdf)
 <use ../../output/pbmc/figures/Gene_Networks.pdf>
 Package pdftex.def Info: ../../output/pbmc/figures/Gene_Networks.pdf  used on i
@@ -1329,7 +1330,7 @@ Overfull \hbox (42.67912pt too wide) in paragraph at lines 216--216
 [] [] 
  []
 
-<../../output/pbmc/figures/umaps.pdf, id=196, 614.295pt x 782.925pt>
+<../../output/pbmc/figures/umaps.pdf, id=179, 614.295pt x 782.925pt>
 File: ../../output/pbmc/figures/umaps.pdf Graphic file (type pdf)
 <use ../../output/pbmc/figures/umaps.pdf>
 Package pdftex.def Info: ../../output/pbmc/figures/umaps.pdf  used on input lin
@@ -1345,7 +1346,7 @@ LaTeX Font Info:    Try loading font information for T1+lmr on input line 228.
 (/usr/local/texlive/2017basic/texmf-dist/tex/latex/lm/t1lmr.fd
 File: t1lmr.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-<../../output/pbmc/figures/Predictions.pdf, id=225, 616.02014pt x 539.18626pt>
+<../../output/pbmc/figures/Predictions.pdf, id=209, 616.02014pt x 539.18626pt>
 File: ../../output/pbmc/figures/Predictions.pdf Graphic file (type pdf)
 <use ../../output/pbmc/figures/Predictions.pdf>
 Package pdftex.def Info: ../../output/pbmc/figures/Predictions.pdf  used on inp
@@ -1359,24 +1360,24 @@ Overfull \hbox (42.67912pt too wide) in paragraph at lines 233--233
 [6 <../../output/pbmc/figures/Freqs.pdf>] [7 <../../output/pbmc/figures/Gene_Ne
 tworks.pdf>] [8 <../../output/pbmc/figures/umaps.pdf>] [9 <../../output/pbmc/fi
 gures/Predictions.pdf>] [10] [11] [12]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 353.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 355.
 [13]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 353.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 355.
 (./final_report.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 353.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 353.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 355.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 355.
 Package rerunfilecheck Info: File `final_report.out' has not changed.
-(rerunfilecheck)             Checksum: 27EBEDA67FAE14FE0B3EA1B620762FB5;1186.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 353.
+(rerunfilecheck)             Checksum: FF4CC0962B119987B84AB1C5D424FC49;1017.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 355.
  ) 
 Here is how much of TeX's memory you used:
- 14146 strings out of 494437
- 219653 string characters out of 6166645
- 357656 words of memory out of 5000000
- 16991 multiletter control sequences out of 15000+600000
- 101254 words of font info for 123 fonts, out of 8000000 for 9000
+ 14152 strings out of 494437
+ 219790 string characters out of 6166645
+ 357661 words of memory out of 5000000
+ 16995 multiletter control sequences out of 15000+600000
+ 101355 words of font info for 124 fonts, out of 8000000 for 9000
  319 hyphenation exceptions out of 8191
- 43i,14n,45p,1736b,491s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 43i,14n,45p,1736b,470s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2017basic/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/usr/l
 ocal/texlive/2017basic/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}{/usr/local/
 texlive/2017basic/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/usr/local/texlive/2
@@ -1396,10 +1397,10 @@ exlive/2017basic/texmf-dist/fonts/type1/public/lm/lmsy10.pfb></usr/local/texliv
 e/2017basic/texmf-dist/fonts/type1/public/lm/lmsy7.pfb></usr/local/texlive/2017
 basic/texmf-dist/fonts/type1/urw/helvetic/uhvb8a.pfb></usr/local/texlive/2017ba
 sic/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb>
-Output written on final_report.pdf (13 pages, 7052643 bytes).
+Output written on final_report.pdf (13 pages, 7053747 bytes).
 PDF statistics:
- 500 PDF objects out of 1000 (max. 8388607)
- 407 compressed objects within 5 object streams
+ 492 PDF objects out of 1000 (max. 8388607)
+ 402 compressed objects within 5 object streams
  74 named destinations out of 1000 (max. 500000)
- 12450 words of extra memory for PDF output out of 14400 (max. 10000000)
+ 12426 words of extra memory for PDF output out of 14400 (max. 10000000)
 
