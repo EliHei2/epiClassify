@@ -113,16 +113,16 @@ class Dataset():
         # TODO: add!
         pass
 
-    def _dataloader(self, dataset = 'train',batch_size=1,use_true_graph=True):
+    def _dataloader(self, dataset = 'train',batch_size=1,use_true_graph=True, shuffle=True):
         if use_true_graph:
             A = self.A_train
         else:
             A = self.Ah_train
 
         if dataset == 'train':
-            return get_dataloader(A, self.X_train, self.y_train)
+            return get_dataloader(A, self.X_train, self.y_train, shuffle=shuffle)
         else:
-            return get_dataloader(A, self.X_test, self.y_test)
+            return get_dataloader(A, self.X_test, self.y_test, shuffle=shuffle)
 
     def CV_dataloaders(self,batch_size=1,use_true_graph=True,n_splits=6,graph_method="glasso_R",alpha=0.5):
         """
