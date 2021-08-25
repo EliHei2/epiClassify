@@ -706,7 +706,7 @@ def compute_metrics(y_true, y_pred):
 
 
 
-def get_dataloader(graph, X, y, batch_size=1,undirected=True):
+def get_dataloader(graph, X, y, batch_size=1,undirected=True, shuffle=True):
     """
         Converts a graph and a dataset to a dataloader.
         
@@ -754,7 +754,7 @@ def get_dataloader(graph, X, y, batch_size=1,undirected=True):
         data     = geo_dt.Data(x=X_tensor, edge_index=edge_index, y=y_tensor)
         list_graphs.append(data.coalesce())
 
-    dataloader = geo_dt.DataLoader(list_graphs, batch_size=batch_size, shuffle=True)
+    dataloader = geo_dt.DataLoader(list_graphs, batch_size=batch_size, shuffle=shuffle)
     return dataloader
 
 
